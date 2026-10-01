@@ -2,11 +2,11 @@
 
 Aplicativo de desktop para preparar ambientes de desenvolvimento no Windows e no Ubuntu/Debian. Permite selecionar ferramentas, revisar comandos, exportar scripts e executar instalações em um terminal local.
 
-Versão atual: **0.3.0**, publicada em **1 de outubro de 2026**.
+Versão do projeto: **0.4.0** · Data da versão: **1 de outubro de 2026**.
 
 ![Prévia ilustrada da interface do Dev Forge](assets/interface.svg)
 
-Prévia ilustrada da interface v0.3.0.
+Prévia ilustrada da interface v0.4.0.
 
 [Baixar a versão mais recente](https://github.com/devheron/dev-forge/releases/latest) · [Histórico de versões](CHANGELOG.md)
 
@@ -51,36 +51,35 @@ Os 23 IDs WinGet do catálogo foram encontrados nos manifests oficiais, e todos 
 
 A auditoria não executou os instaladores e não fez uma instalação apt em Linux. Os testes automatizados verificam o comportamento do Dev Forge, não substituem testes das ferramentas instaladas. Veja a matriz e os limites em [VALIDATION.md](VALIDATION.md).
 
-## Requisitos
+## Baixar e abrir
 
-| Plataforma | Requisitos |
-| --- | --- |
-| Windows 10/11 | Python 3.10 ou superior com Tcl/Tk, WinGet e acesso à internet |
-| Ubuntu/Debian | Python 3.10 ou superior, python3-tk, apt, sudo e interface gráfica |
+### Windows: download direto
 
-O aplicativo usa apenas a biblioteca padrão do Python e funciona localmente. Instalações podem exigir permissões de administrador e reinicialização, conforme o fornecedor.
+[Baixar DevForge.exe para Windows x64](https://github.com/devheron/dev-forge/releases/latest/download/DevForge.exe)
 
-## Instalação
+1. Baixe DevForge.exe e coloque-o em uma pasta que você pretende manter.
+2. Dê dois cliques no arquivo para abrir o aplicativo. Não precisa instalar Python ou extrair o código-fonte.
+3. Se quiser, clique em **Atalho** para criar um ícone na área de trabalho.
 
-Baixe `dev-forge.zip` nos assets de uma release do repositório `devheron/dev-forge`. Extraia a pasta antes de executar. O arquivo gerado por **Code > Download ZIP** também serve para executar o código-fonte; o atualizador utiliza exclusivamente o asset de release.
+O arquivo é portátil: ele abre o Dev Forge e não instala todas as ferramentas automaticamente. Você escolhe os programas depois, dentro do aplicativo. O executável ainda não possui assinatura de código; o Windows pode apresentar alertas conforme sua política de segurança.
 
-### Windows
+Para instalar ferramentas no Windows, o WinGet precisa estar disponível pelo App Installer. Algumas instalações pedem administrador por UAC e podem exigir reinicialização. Recusar a solicitação cancela a execução.
 
-Se necessário, instale Python:
+### Linux: pacote portátil
 
-```powershell
-winget install --id Python.Python.3.13 --exact
-```
+[Baixar pacote Linux x64](https://github.com/devheron/dev-forge/releases/latest/download/dev-forge-linux-x64.tar.gz)
 
-Abra um novo terminal. Execute `start-windows.cmd` ou:
+Extraia o pacote pelo gerenciador de arquivos e abra **DevForge**. Ele inclui o runtime Python. Em ambientes que exigem autorização para abrir um binário, confira a permissão de execução nas propriedades do arquivo. A abertura depende também do comportamento do gerenciador de arquivos.
 
-```powershell
-python app.py
-```
+O build é feito para Linux x64 com base Ubuntu 22.04. Requer ambiente gráfico e bibliotecas de sistema compatíveis; não é um binário universal para todas as distribuições. A instalação automática de ferramentas continua voltada a Ubuntu/Debian com apt e sudo. Clique em **Atalho** para adicionar o Dev Forge ao menu de aplicativos. Preserve a pasta extraída.
 
-WinGet está disponível pelo App Installer da Microsoft. O botão de instalação abre PowerShell com solicitação UAC. Recusar a solicitação cancela a execução. A política de execução temporária aplica-se somente ao processo iniciado.
+### Código-fonte: opção alternativa
 
-### Ubuntu/Debian
+[Baixar código-fonte](https://github.com/devheron/dev-forge/releases/latest/download/dev-forge.zip)
+
+Esta opção é para quem prefere executar ou modificar o código. Extraia a pasta e instale Python 3.10 ou superior com Tcl/Tk.
+
+No Windows, abra `start-windows.cmd`. No Ubuntu/Debian, instale Python/Tkinter e abra o inicializador:
 
 ```bash
 sudo apt-get update
@@ -88,7 +87,7 @@ sudo apt-get install -y python3 python3-tk
 bash start-linux.sh
 ```
 
-O botão abre um terminal gráfico para solicitar sudo e executar o plano. Em servidores sem interface gráfica, exporte um script em outra máquina e execute-o com Bash.
+O download de **Code > Download ZIP** também contém o código-fonte. Ele é independente dos downloads executáveis da página Releases.
 
 ## Uso
 
@@ -129,9 +128,11 @@ O cabeçalho apresenta versão, data, histórico e controles de atualização. O
 - **Histórico** mostra as alterações locais e as notas da release consultada.
 - **Baixar e atualizar** requer confirmação do usuário. Nenhuma atualização é obrigatória.
 
-O download exige o asset `dev-forge.zip` com digest SHA-256 informado pelo GitHub. O aplicativo verifica o conteúdo, os caminhos do ZIP e a versão antes de extrair. A nova versão é aberta em uma pasta separada, preservando a anterior. Apenas a configuração de consulta é copiada; as seleções de ferramentas são reiniciadas. Para voltar, execute a versão anterior pela pasta original. Para continuar usando a nova versão, utilize seu inicializador; atalhos externos não são alterados.
+A atualização escolhe um pacote compatível com a forma de execução: código-fonte, executável Windows ou executável Linux. O download é validado pelo digest SHA-256 informado pelo GitHub; caminhos e versão também são conferidos antes da extração.
 
-A distribuição atual requer Python na máquina. A consulta oferece atualização apenas quando existe uma release estável posterior com um pacote válido.
+A versão nova abre em uma pasta separada e a anterior é preservada. Depois de atualizar, use **Atalho** para apontar o ícone para a versão nova. Nenhum atalho externo é alterado automaticamente. No modo executável, suas preferências ficam na pasta de dados do usuário e são compartilhadas entre versões.
+
+Quem usa a distribuição em Python pode continuar atualizando nesse formato. Para passar à opção executável, baixe o aplicativo portátil uma primeira vez. A consulta ao abrir é opcional, e nenhuma versão é baixada sem sua escolha.
 
 ## Privacidade e registros
 
@@ -155,4 +156,5 @@ Scripts gerados param no primeiro erro; o resultado deve ser conferido no termin
 ## Licença
 
 MIT. As ferramentas instaladas mantêm suas próprias licenças e condições de uso.
+
 

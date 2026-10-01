@@ -1,25 +1,98 @@
 name: Release
 on:
   push:
+    branches: [main]
+    paths: ['version.json']
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build (must include this workflow)'
+        required: true
+        default: 'v0.4.0'
 permissions:
-  contents: write
+  contents: read
+concurrency:
+  group: dev-forge-release
+  cancel-in-progress: false
 jobs:
-  publish:
+  prepare:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      commit: ${{ steps.version.outputs.commit }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Create or validate version tag
+        id: version
+        env:
+          RELEASE_REF: ${{ github.event.inputs.tag || github.ref_name }}
+        run: python prepare_release.py --ref "$RELEASE_REF"
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: ubuntu-22.04
+            name: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
       - name: Verify version tag
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: python -c "import os,json; assert os.environ['RELEASE_TAG'] == 'v' + json.load(open('version.json'))['version']"
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python -c "import os,json,subprocess; v='v'+json.load(open('version.json'))['version']; assert os.environ['RELEASE_TAG']==v; assert subprocess.check_output(['git','rev-list','-n','1',v],text=True).strip()==subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()"
+      - name: Linux desktop build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb xauth libx11-6 libxext6 libxrender1
+      - run: python -m pip install -r requirements-build.txt
       - run: python -m unittest discover -s tests -v
-      - run: python package_release.py
-      - name: Publish release asset
+      - run: python build_desktop.py --output release-assets
+      - name: Build source distribution
+        if: runner.os == 'Linux'
+        run: python package_release.py release-assets/dev-forge.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.name }}
+          path: release-assets/*
+          if-no-files-found: error
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dev-forge.zip --title "Dev Forge $RELEASE_TAG" --notes-file CHANGELOG.md --verify-tag
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_REPO: ${{ github.repository }}
+        run: python publish_release.py --tag "$RELEASE_TAG" --assets release-assets --repo "$RELEASE_REPO"

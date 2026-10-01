@@ -12,4 +12,5 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -m unittest discover -s tests -v
-      - run: python -m compileall -q app.py ui.py engine.py catalog.py updater.py package_release.py
+      - run: python -m compileall -q app.py ui.py engine.py catalog.py updater.py runtime.py shortcuts.py package_release.py build_desktop.py publish_release.py prepare_release.py desktop_entry.py
+

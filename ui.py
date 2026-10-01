@@ -5,6 +5,7 @@ import webbrowser
 from tkinter import ttk
 from catalog import CATALOG, PROFILES
 from updater import METADATA
+from runtime import RESOURCES
 
 BG = '#101927'
 PANEL = '#172334'
@@ -29,6 +30,10 @@ def build_ui(app, icon_factory):
     root = app.root
     root.title(f"Dev Forge {METADATA['version']}")
     root.configure(bg=BG)
+    icon_path = RESOURCES / 'assets' / 'dev-forge.png'
+    if icon_path.exists():
+        app.window_icon = tk.PhotoImage(master=root, data=icon_path.read_bytes(), format='png')
+        root.iconphoto(True, app.window_icon)
     width = min(1180, root.winfo_screenwidth() - 80)
     height = min(840, root.winfo_screenheight() - 100)
     root.geometry(f'{width}x{height}+30+30')
@@ -74,6 +79,7 @@ def build_ui(app, icon_factory):
     update_controls.grid(row=0, column=1, sticky='e')
     ttk.Button(update_controls, text='Histórico', command=app.show_history).pack(side='left', padx=3)
     ttk.Button(update_controls, text='Repositório', command=app.configure_updates).pack(side='left', padx=3)
+    ttk.Button(update_controls, text='Atalho', command=app.make_shortcut).pack(side='left', padx=3)
     app.update_button = ttk.Button(update_controls, text='↓ Verificar versão', command=app.check_updates)
     app.update_button.pack(side='left', padx=(3, 0))
 

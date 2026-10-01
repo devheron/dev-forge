@@ -48,3 +48,9 @@ Uma requisição HEAD verifica acesso ao endereço sem transferir o instalador i
 O WinGet não estava disponível no ambiente de execução usado para esta revisão. Nenhum dos 23 instaladores foi executado por esta auditoria. WSL, Angular CLI e receitas React não fazem parte dos 23 IDs verificados. Não foi feito teste de instalação apt em uma máquina Ubuntu/Debian, nem foi validada a instalação manual das ferramentas nessa plataforma.
 
 A aprovação de uma release para distribuição ampla deve incluir instalação em Windows e Linux de teste, verificação de versões, abertura dos aplicativos gráficos e execução das etapas complementares. Esta entrega não deve ser descrita como instalação integral testada em ambos os sistemas.
+
+## Distribuição 0.4.0
+
+Os 22 testes automatizados locais verificam geração de planos, dependências, seleção de pacotes, atualização e publicação, incluindo releases existentes e criação segura de tags. A interface em código-fonte foi conferida em diferentes tamanhos de janela.
+
+O executável Windows foi compilado e o pacote foi gerado. Sua inicialização não foi validada neste ambiente: Tcl/Tk não conseguiu ler seus arquivos de inicialização extraídos, apesar de eles estarem presentes. O pacote Linux não foi compilado localmente. O workflow exige teste de inicialização dos dois binários antes de publicar; a execução desse workflow no GitHub ainda está pendente. Estes resultados não equivalem a testes reais de instalação das ferramentas do catálogo.

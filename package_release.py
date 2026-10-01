@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 BASE = Path(__file__).resolve().parent
-FILES = ('app.py', 'ui.py', 'catalog.py', 'engine.py', 'updater.py', 'version.json', 'README.md', 'CHANGELOG.md', 'VALIDATION.md', 'LICENSE', 'start-windows.cmd', 'start-linux.sh', 'package_release.py')
+FILES = ('app.py', 'desktop_entry.py', 'ui.py', 'runtime.py', 'shortcuts.py', 'catalog.py', 'engine.py', 'updater.py', 'version.json', 'README.md', 'CHANGELOG.md', 'VALIDATION.md', 'LICENSE', 'start-windows.cmd', 'start-linux.sh', 'package_release.py', 'build_desktop.py', 'publish_release.py', 'prepare_release.py', 'requirements-build.txt')
 
 def build(destination):
     metadata = json.loads((BASE / 'version.json').read_text(encoding='utf-8'))

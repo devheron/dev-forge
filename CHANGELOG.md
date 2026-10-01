@@ -1,5 +1,17 @@
 # Histórico de versões
 
+## 0.4.0 — 2026-10-01
+
+- Executável portátil Windows x64 com ícone, sem exigir instalação de Python.
+- Build automatizado de binário portátil Linux x64.
+- Botão para criar um atalho na área de trabalho ou no menu de aplicativos.
+- Atualizador escolhe pacote de código-fonte ou executável conforme a distribuição em uso.
+- Configurações de executáveis preservadas na pasta de dados do usuário.
+- Actions compila e verifica os executáveis antes de publicar a release.
+- Enviar uma versão nova em version.json para main dispara a criação da tag e da release.
+- Publicação reutiliza uma release existente, evitando erro de tag duplicada.
+- Guias locais separados para primeira publicação e atualizações futuras.
+
 ## 0.3.0 — 2026-10-01
 
 - Layout adaptável com painéis lado a lado ou empilhados conforme a janela.

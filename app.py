@@ -14,6 +14,8 @@ import webbrowser
 from pathlib import Path
 from catalog import CATALOG, PROFILES
 from ui import build_ui
+from runtime import update_directory, updated_launch_command
+from shortcuts import create_shortcut
 from engine import generate, notes, resolve
 from updater import METADATA, BASE, load_settings, save_settings, validate_repository, check_release, download_update
 
@@ -129,6 +131,15 @@ class App:
         except (ValueError, OSError):
             messagebox.showerror('Configuração', 'Use usuario/repositorio e uma pasta com permissão de escrita.')
 
+    def make_shortcut(self):
+        if not messagebox.askyesno('Criar atalho', 'Criar ou atualizar o atalho Dev Forge para esta versão? Windows: área de trabalho. Linux: menu de aplicativos.'):
+            return
+        try:
+            create_shortcut()
+            messagebox.showinfo('Atalho criado', 'Atalho criado para esta cópia do aplicativo. Preserve o arquivo ou a pasta de onde ele foi aberto.')
+        except (OSError, subprocess.CalledProcessError, ValueError):
+            messagebox.showerror('Atalho', 'Não foi possível criar o atalho. Confira as permissões de escrita e preserve a pasta do aplicativo.')
+
     def run_task(self, kind, action):
         if self.busy:
             return
@@ -152,11 +163,11 @@ class App:
     def apply_update(self):
         release = self.release
         if not release or 'url' not in release:
-            return messagebox.showinfo('Pacote indisponível', 'Publique dev-forge.zip como asset da release com digest SHA-256. Consulte o histórico para detalhes.')
+            return messagebox.showinfo('Pacote indisponível', 'A release ainda não contém um pacote verificado para esta distribuição. Confira a página de downloads do projeto.')
         if not messagebox.askyesno('Atualizar Dev Forge', f"Baixar e abrir a versão {release['version']} de {release['repository']}? A versão atual será preservada e as seleções serão reiniciadas. Confira o histórico antes de continuar."):
             return
         self.update_label.configure(text='Baixando e verificando...')
-        self.run_task('download', lambda: download_update(release, BASE.parent))
+        self.run_task('download', lambda: download_update(release, update_directory()))
 
     def poll_events(self):
         try:
@@ -175,8 +186,10 @@ class App:
             self.update_button.configure(text='↓ Baixar e atualizar' if result else '↓ Verificar versão', command=self.apply_update if result else self.check_updates)
         else:
             try:
-                (result / 'settings.local.json').write_text(json.dumps(self.settings, indent=2), encoding='utf-8')
-                subprocess.Popen([sys.executable, str(result / 'app.py')], cwd=str(result))
+                kind = self.release.get('kind', 'source')
+                if kind == 'source':
+                    (result / 'settings.local.json').write_text(json.dumps(self.settings, indent=2), encoding='utf-8')
+                subprocess.Popen(updated_launch_command(result, kind), cwd=str(result))
                 self.root.destroy()
                 return
             except OSError:
@@ -223,5 +236,20 @@ class App:
         except (OSError, subprocess.CalledProcessError):
             messagebox.showerror('Não foi possível iniciar', 'Confira a permissão de execução, a disponibilidade do terminal e a solicitação de administrador.')
 
+def main():
+    root = tk.Tk()
+    if len(sys.argv) == 3 and sys.argv[1] == '--self-test':
+        root.withdraw()
+        app = App(root)
+        app.profile('Frontend')
+        root.update_idletasks()
+        from runtime import is_packaged
+        Path(sys.argv[2]).write_text(json.dumps({'version': METADATA['version'], 'packaged': is_packaged(), 'tk': root.tk.call('info','patchlevel'), 'tools': len(CATALOG), 'ok': bool(app.script and app.os_icons)}), encoding='utf-8')
+        for task in root.tk.call('after', 'info'):
+            root.after_cancel(task)
+        root.destroy()
+    else:
+        App(root).root.mainloop()
+
 if __name__ == '__main__':
-    App(tk.Tk()).root.mainloop()
+    main()

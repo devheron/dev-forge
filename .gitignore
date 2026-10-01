@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.log
 .venv/
+.venv-build/
 build/
 dist/
 *.spec
@@ -9,3 +10,6 @@ settings.local.json
 settings.local.tmp
 PUBLICACAO.local.md
 dev-forge.zip
+*.local.md
+release-assets/
+*.exe
